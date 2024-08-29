@@ -268,7 +268,7 @@ function getSymbol(
   }
   return symbol;
 }
-
+// get call expression
 function getCallExpression(
   context: TSESLint.RuleContext<MessageIds, Options>,
   id: TSESTree.Node,
