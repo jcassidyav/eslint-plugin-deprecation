@@ -21,7 +21,7 @@ import {
 } from '@typescript-eslint/utils';
 import { AccessKind, getAccessKind } from 'ts-api-utils';
 import * as ts from 'typescript';
-import { stringifyJSDocTagInfoText } from '../utils/stringifyJSDocTagInfoText';
+import { getSourceAncestors, stringifyJSDocTag } from '../utils';
 
 const createRule = ESLintUtils.RuleCreator(
   () => 'https://github.com/gund/eslint-plugin-deprecation',
@@ -37,7 +37,6 @@ export default createRule<Options, MessageIds>({
     type: 'problem',
     docs: {
       description: 'Do not use deprecated APIs.',
-      requiresTypeChecking: true,
     },
     messages: {
       deprecated: `'{{name}}' is deprecated. {{reason}}`,
@@ -85,9 +84,9 @@ function createRuleForIdentifier(
     }
 
     // - Inside an import
-    const isInsideImport = context
-      .getAncestors()
-      .some((anc) => anc.type.includes('Import'));
+    const isInsideImport = getSourceAncestors(id, context).some((anc) =>
+      anc.type.includes('Import'),
+    );
 
     if (isInsideImport) {
       return;
@@ -109,11 +108,6 @@ function createRuleForIdentifier(
   };
 }
 
-function getParent(context: TSESLint.RuleContext<MessageIds, Options>) {
-  const ancestors = context.getAncestors();
-  return ancestors.length > 0 ? ancestors[ancestors.length - 1] : undefined;
-}
-
 // Unfortunately need to keep some state because identifiers like foo in
 // `const { foo } = bar` will be processed twice.
 let lastProcessedDuplicateName: string | undefined;
@@ -122,9 +116,13 @@ function isDeclaration(
   id: TSESTree.Identifier | TSESTree.JSXIdentifier,
   context: TSESLint.RuleContext<MessageIds, Options>,
 ) {
-  const parent = getParent(context);
+  const parent = getSourceAncestors(id, context).at(-1);
 
-  switch (parent?.type) {
+  if (!parent) {
+    return false;
+  }
+
+  switch (parent.type) {
     case 'TSEnumDeclaration':
     case 'TSInterfaceDeclaration':
     case 'TSTypeAliasDeclaration':
@@ -198,10 +196,8 @@ function isDeclaration(
       // Yes: bar in `function foo(bar = 3) {}` and `const [bar = 3] = []`
       // No: bar in `const { bar = 3 }`
       return parent.left === id && !isShortHandProperty(parent.parent);
-
-    default:
-      return false;
   }
+  return false;
 }
 
 function getDeprecation(
@@ -277,7 +273,7 @@ function getCallExpression(
   context: TSESLint.RuleContext<MessageIds, Options>,
   id: TSESTree.Node,
 ): TSESTree.CallExpression | TSESTree.TaggedTemplateExpression | undefined {
-  const ancestors = context.getAncestors();
+  const ancestors = context.sourceCode.getAncestors(id);
   let callee = id;
   let parent =
     ancestors.length > 0 ? ancestors[ancestors.length - 1] : undefined;
@@ -290,6 +286,7 @@ function getCallExpression(
   if (isCallExpression(parent, callee)) {
     return parent;
   }
+  return undefined;
 }
 
 function isCallExpression(
@@ -311,7 +308,7 @@ function isCallExpression(
 function getJsDocDeprecation(tags: ts.JSDocTagInfo[]) {
   for (const tag of tags) {
     if (tag.name === 'deprecated') {
-      return { reason: stringifyJSDocTagInfoText(tag) };
+      return { reason: stringifyJSDocTag(tag) };
     }
   }
   return undefined;

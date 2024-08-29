@@ -1,10 +1,10 @@
 import { TSESLint } from '@typescript-eslint/utils';
-import { RuleTester } from '../utils/get-rule-tester';
+import { RuleTester } from '@typescript-eslint/rule-tester';
 import rule, { MessageIds, Options } from '../../src/rules/deprecation';
 import * as path from 'path';
 
 const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser',
+  languageOptions: {
   parserOptions: {
     ecmaVersion: 2018,
     ecmaFeatures: {
@@ -14,6 +14,7 @@ const ruleTester = new RuleTester({
     tsconfigRootDir: path.resolve(__dirname, '..'),
     project: './tsconfig.test.json', // relative to tsconfigRootDir
   },
+}
 });
 
 ruleTester.run('deprecation', rule, {
