@@ -126,3 +126,4 @@ load('<h2 class="title">Hello world</h2>'); // ✅ Allowed library API, uses nam
 ## Credits
 
 This rule was originally ported from the [SonarJS repository](https://github.com/SonarSource/SonarJS).
+which was then forked from https://github.com/gund/eslint-plugin-deprecation
