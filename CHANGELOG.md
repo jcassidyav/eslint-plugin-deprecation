@@ -1,5 +1,17 @@
 # Changelog
 
+# [4.0.0](https://github.com/jcassidyav/eslint-plugin-deprecation/compare/v3.0.0...v4.0.0) (2024-08-29)
+
+
+### Features
+
+* eSLint 9 support ([013f9c1](https://github.com/jcassidyav/eslint-plugin-deprecation/commit/013f9c1f044eb8e91fb081bf09d9ff7a16a97fa8))
+
+
+### BREAKING CHANGES
+
+* ESLint 9 required
+
 # [3.0.0](https://github.com/gund/eslint-plugin-deprecation/compare/v2.0.0...v3.0.0) (2024-05-31)
 
 
