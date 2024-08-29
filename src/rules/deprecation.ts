@@ -37,7 +37,6 @@ export default createRule<Options, MessageIds>({
     type: 'problem',
     docs: {
       description: 'Do not use deprecated APIs.',
-      requiresTypeChecking: true,
     },
     messages: {
       deprecated: `'{{name}}' is deprecated. {{reason}}`,
@@ -198,6 +197,7 @@ function isDeclaration(
       // No: bar in `const { bar = 3 }`
       return parent.left === id && !isShortHandProperty(parent.parent);
   }
+  return false;
 }
 
 function getDeprecation(
@@ -273,7 +273,7 @@ function getCallExpression(
   context: TSESLint.RuleContext<MessageIds, Options>,
   id: TSESTree.Node,
 ): TSESTree.CallExpression | TSESTree.TaggedTemplateExpression | undefined {
-  const ancestors = context.getAncestors();
+  const ancestors = context.sourceCode.getAncestors(id);
   let callee = id;
   let parent =
     ancestors.length > 0 ? ancestors[ancestors.length - 1] : undefined;
@@ -286,6 +286,7 @@ function getCallExpression(
   if (isCallExpression(parent, callee)) {
     return parent;
   }
+  return undefined;
 }
 
 function isCallExpression(
