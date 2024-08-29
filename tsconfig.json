@@ -13,6 +13,8 @@
     "paths": {},
     "pretty": true,
     "resolveJsonModule": true,
+    "noEmitHelpers": true,
+    "importHelpers": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,

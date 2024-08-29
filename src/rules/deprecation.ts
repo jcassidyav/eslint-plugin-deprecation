@@ -19,7 +19,7 @@ import {
   TSESLint,
   TSESTree,
 } from '@typescript-eslint/utils';
-import { isReassignmentTarget } from 'tsutils';
+import { AccessKind, getAccessKind } from 'ts-api-utils';
 import * as ts from 'typescript';
 import { getSourceAncestors, stringifyJSDocTag } from '../utils';
 
@@ -328,6 +328,10 @@ function isFunction(symbol: ts.Symbol) {
     default:
       return false;
   }
+}
+
+function isReassignmentTarget(node: ts.Expression): boolean {
+  return (getAccessKind(node) & AccessKind.Write) !== 0;
 }
 
 function isPropertyAssignment(node: ts.Node): node is ts.PropertyAssignment {
